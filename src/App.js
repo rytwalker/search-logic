@@ -1,26 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
 import './App.css';
+import Callback from './components/Callback';
+import Main from './components/Main';
+import NotFound from './components/NotFound';
+import Secret from './components/Secret';
+import Auth from './Auth';
+import SearchView from './components/SearchView';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = { auth: new Auth() };
+
+  render() {
+    const { auth } = this.state;
+    return (
+      <div className="App">
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={props => <Main {...props} auth={auth} />}
+          />
+          <Route
+            path="/secret"
+            component={auth.isAuthenticated() ? Secret : NotFound}
+          />
+          <Route path="/search" component={SearchView} />
+          <Route path="/callback" component={Callback} />
+          <Route path="*" exact component={NotFound} />>
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default App;
