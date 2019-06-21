@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+// helper to remove comma;
+const removeTrailingComma = string => {
+  return string[string.length - 1] === ','
+    ? string.slice(0, string.length - 1)
+    : string;
+};
 class Search extends Component {
   state = {
     name: '',
@@ -81,36 +87,29 @@ class Search extends Component {
   };
 
   formatRequestObject = type => {
+    const { name, cityState, email, phone } = this.state;
     const person = {};
     switch (type) {
       case 'name':
         person.names = [];
-        let splitName = this.state.name.trim().split(' ');
+        let splitName = name.trim().split(' ');
         if (splitName.length === 2) {
           person.names.push({ first: splitName[0], last: splitName[1] });
         } else if (splitName.length === 3) {
           person.names.push({
-            first: splitName[0],
-            middle: splitName[1],
-            last: splitName[2]
+            first: removeTrailingComma(splitName[0]),
+            middle: removeTrailingComma(splitName[2]),
+            last: removeTrailingComma(splitName[1])
           });
         }
-        if (this.state.cityState.length) {
+        if (cityState.length) {
           person.addresses = [];
-          let splitAddress = this.state.cityState.trim().split(' ');
+          let splitAddress = cityState.trim().split(' ');
           if (splitAddress.length > 1) {
-            let city = '';
-            let state = splitAddress[splitAddress.length - 1];
-            for (let i = 0; i < splitAddress.length - 1; i++) {
-              city += splitAddress[i] + ' ';
-            }
-            // remove last whitespace
-            city = city.slice(0, city.length - 1);
+            let state = splitAddress.pop();
+            let city = splitAddress.join(' ');
             // remove comma if at end of city
-            city =
-              city[city.length - 1] === ','
-                ? city.slice(0, city.length - 1)
-                : city;
+            city = removeTrailingComma(city);
 
             person.addresses.push({
               state: state,
@@ -122,9 +121,18 @@ class Search extends Component {
         return person;
       case 'email':
         person.emails = [];
-        if (this.state.email.length) {
+        if (email.length) {
           person.emails.push({
-            address: this.state.email
+            address: email
+          });
+        }
+        console.log(person);
+        return person;
+      case 'phone':
+        if (phone.length) {
+          person.phones = [];
+          person.phones.push({
+            number: phone.replace(/[^0-9]+/g, '')
           });
         }
         console.log(person);
@@ -162,7 +170,7 @@ class Search extends Component {
     let inputKey;
     let inputValue;
     const inputObj = this.findInputWithLength();
-    const { name, cityState, email, phone, url } = this.state;
+    const { name, email, phone, url } = this.state;
 
     for (let [key, value] of Object.entries(inputObj)) {
       inputKey = key;
